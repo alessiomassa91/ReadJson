@@ -1,0 +1,20 @@
+/* 
+  Localizable.strings
+  ReadJson
+
+  Created by Alessio Massa on 23/01/2020.
+  Copyright © 2020 Alessio Massa. All rights reserved.
+*/
+
+//HOME
+
+"HOME_TITLE" = "Top Paid App";
+//Alert
+"SERVER_ERROR_ALERT_TITLE" = "Server Unavailable";
+"SERVER_ERROR_ALERT_CONTEXT" = "There was a problem connecting to the server. Please check your internet connection and try again.";
+"SERVER_ERROR_ALERT_BUTTON" = "OK";
+"NETWORK_ERROR_ALERT_CONTEXT" = "Network not available";
+
+//DETAIL
+
+"RELEASE_LABEL" = "Release";
