@@ -34,9 +34,6 @@ class HomeController: UIViewController {
         spinner?.spinnerImplementation()
         spinner?.refreshControlImplementation()
         
-        /// Json Response Exstension Connection
-        JsonManager.delegate = self
-        
         /// Table View Exstension Connection
         self.homeTableView.delegate = self
         self.homeTableView.dataSource = self
@@ -75,6 +72,8 @@ class HomeController: UIViewController {
 extension HomeController: UITableViewDelegate, UITableViewDataSource{
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        /// Json Response Exstension Connection
+        JsonManager.delegate = self
         return homeManager.storage.count
     }
     
@@ -87,7 +86,6 @@ extension HomeController: UITableViewDelegate, UITableViewDataSource{
         cell.categoryApp.text = homeManager.storage[indexPath.row].category_name
         cell.priceApp.text = homeManager.storage[indexPath.row].price
         cell.rank.text = ("# \(homeManager.storage[indexPath.row].position)")
-        
         return cell
     }
     
@@ -99,9 +97,9 @@ extension HomeController: UITableViewDelegate, UITableViewDataSource{
 //
 extension HomeController: NetworkManagerDelegate {
    
-    
     func networkFinishedWithData(response: (JsonTypeResponse, String, String, String)) {
         DispatchQueue.main.async {
+            print("data")
             if self.errorFound {
                 self.errorFound = false
                 self.labelNoConnection?.isHidden = true
@@ -112,6 +110,7 @@ extension HomeController: NetworkManagerDelegate {
     func networkFinishedWithError(response: (JsonTypeResponse, String, String, String)) {
         ///Stop spinner
         spinner?.spin.stopAnimating()
+        spinner?.ptr.endRefreshing()
         
         DispatchQueue.main.async {
             

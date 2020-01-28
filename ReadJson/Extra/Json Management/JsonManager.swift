@@ -33,6 +33,8 @@ extension JsonManager {
                         let json = JSON(response.result.value!)
                         HomeManager.shared.jsonHomeObject = JsonHomeModel(json: json)
                         setData!(json)
+                        JsonManager.self.delegate?.networkFinishedWithData(
+                        response: JsonTypeResponse.getNetworkResponse(networkResponse: .networkOK))
                     case 500..<600:
                         JsonManager.self.delegate?.networkFinishedWithError(
                             response: JsonTypeResponse.getNetworkResponse(networkResponse: .serverError))
