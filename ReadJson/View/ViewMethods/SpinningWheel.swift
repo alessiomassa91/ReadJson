@@ -12,20 +12,20 @@ class SpinningWheel {
     
     var ptr : UIRefreshControl!
     var spin : UIActivityIndicatorView!
-    var tableView: UITableView
+    var collectionView: UICollectionView
     
-    init(tableView: UITableView) {
-        self.tableView = tableView
+    init(collectionView: UICollectionView) {
+        self.collectionView = collectionView
     }
+    
     /// This method is used to implement the refresh control and add the spin when you drag down the table in the meantime is refreshing the table
     func refreshControlImplementation() {
         ptr = UIRefreshControl()
         ptr.addTarget(self, action: #selector(refresh), for: .valueChanged)
-        tableView.addSubview(ptr)
+        collectionView.addSubview(ptr)
     }
     
     /// This method is used to activate the spinner in the middle of the table
-    /// - Parameter tableView: The table view in which you want to add the spin;
     func spinnerImplementation() {
         if spin == nil {
             spin = UIActivityIndicatorView(style: .large)
@@ -33,38 +33,43 @@ class SpinningWheel {
             spin.hidesWhenStopped = true
             spin.center = CGPoint(x: UIScreen.main.bounds.size.width / 2,
                                   y: (UIScreen.main.bounds.size.height / 2) - 44)
-            tableView.addSubview(spin)
+            collectionView.addSubview(spin)
         }
         spin.startAnimating()
     }
     
+    /// Reload data
     private func getData() {
-        JsonManager().readJson(url: JsonHomeModel.url, setData: HomeManager.shared.loadData)
+        if InitAppManager.online {
+            ParseJson().readJson(url: ItunesJsonModel.url, setData: ItunesJsonManager.shared.readJson)
+        } else {
+            ParseJson().readOfflineJson(setData: ItunesJsonManager.shared.readJson)
+        }
+        
     }
     
+    /// Scroll refresh
     @objc private func refresh() {
         ptr.beginRefreshing()
         getData()
     }
     
-    
-    
-    func reloadTable() {
-        
-        if ptr != nil && ptr.isRefreshing {
-            ptr.endRefreshing()
-        }
-        
-        if spin != nil {
-            spin.stopAnimating()
-        }
-        self.tableView.reloadData()
-    }
-    
+    /// Button refresh
     func buttonRefreshPressed() {
         if spin != nil {
             spin.startAnimating()
         }
+        collectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
         getData()
+    }
+    
+    func stopAnimation() {
+        
+        if ptr != nil && ptr.isRefreshing {
+            ptr.endRefreshing()
+        }
+        if spin != nil {
+            spin.stopAnimating()
+        }
     }
 }
