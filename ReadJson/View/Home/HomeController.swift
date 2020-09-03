@@ -1,149 +1,197 @@
 //
-//  HomeController.swift
+//  HomeControllerNew.swift
 //  ReadJson
 //
-//  Created by Alessio Massa on 18/12/2019.
-//  Copyright © 2019 Alessio Massa. All rights reserved.
+//  Created by Alessio Massa on 02/09/2020.
+//  Copyright © 2020 Alessio Massa. All rights reserved.
 //
 
 import UIKit
-import AlamofireImage
+
+
+enum HomeControllerSection: Hashable {
+    case main
+}
+
+struct HomeControllerModel: Hashable {
+    var name: String?
+    var image_app: String?
+    var description: String?
+    var price: String?
+    var link_app: String?
+    var artist_name: String?
+    var category_name: String?
+    var release_data: String?
+    
+    
+    init(entryArray: ItunesJsonModel.Feed.Entry) {
+        self.name = entryArray.im_name ?? ""
+        self.image_app = entryArray.im_image?[0].label ?? ""
+        self.description = entryArray.summary ?? ""
+        self.price = entryArray.im_price?.price ?? ""
+        self.link_app = entryArray.link?[0].href ?? ""
+        self.artist_name = entryArray.im_artist?.label ?? ""
+        self.category_name = entryArray.category?.label ?? ""
+        self.release_data = entryArray.im_releaseDate?.attributes_label ?? ""
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(identifier)
+    }
+    
+    static func ==(lhs: HomeControllerModel, rhs: HomeControllerModel) -> Bool {
+        return lhs.identifier == rhs.identifier
+    }
+    private let identifier = UUID()
+}
 
 class HomeController: UIViewController {
     
-    //
-    // MARK: - IBOutlets
-    //
-    @IBOutlet weak var homeTableView: UITableView!
+    let viewModel = HomeViewModel.shared
     
-    //
-    // MARK: - Variables and Properties
-    //
-    let homeManager = HomeManager.shared
-    var spinner : SpinningWheel?
-    var labelNoConnection: UILabel!
-    var errorFound = false
+    var labelNoConnection: UILabel?
+    var collectionView: UICollectionView!
+    var dataSource: UICollectionViewDiffableDataSource<HomeControllerSection, HomeControllerModel>?
+    var spinner: SpinningWheel?
+    private var refreshButton: UIBarButtonItem!
     
     override func viewDidLoad() {
-        
-        /// HomeManager Connection
-        homeManager.homeController = self
-        
-        /// Spinner Initialization
-        spinner = SpinningWheel(tableView: homeTableView)
-        spinner?.spinnerImplementation()
-        spinner?.refreshControlImplementation()
-        
-        /// Table View Exstension Connection
-        self.homeTableView.delegate = self
-        self.homeTableView.dataSource = self
-        
-        /// Title
-        navigationItem.title = titleHomeTranslation
-        
+        super.viewDidLoad()
+        viewModel.homeController = self
+        configureNavBar()
+        configureHierarchy()
+        initManager()
+        configureDataSource()
     }
     
-    //
-    // MARK: - IBActions
-    //
-    @IBAction func refreshAction(_ sender: UIBarButtonItem) {
-        if homeManager.storage.count > 1 {
-            InterfaceMethods().goToTopTableView(tableView: self.homeTableView)
+    func initManager() {
+        /// Spinner Initialization
+        spinner = SpinningWheel(collectionView: collectionView)
+        spinner?.spinnerImplementation()
+        spinner?.refreshControlImplementation()
+        /// Json Response Exstension Connection
+        ParseJson.delegate = self
+        if !InitAppManager.online {
+            spinner?.stopAnimation()
         }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if let indexPath = self.collectionView.indexPathsForSelectedItems?.first {
+            if let coordinator = self.transitionCoordinator {
+                coordinator.animate(alongsideTransition: { context in
+                    self.collectionView.deselectItem(at: indexPath, animated: true)
+                }) { (context) in
+                    if context.isCancelled {
+                        self.collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+                    }
+                }
+            } else {
+                self.collectionView.deselectItem(at: indexPath, animated: animated)
+            }
+        }
+    }
+}
+
+extension HomeController {
+    
+    func configureNavBar() {
+        
+        self.setNavBar(titleView: nil, title: viewModel.titleHome)
+        refreshButton = UIBarButtonItem(image: UIImage(systemName: "arrow.clockwise"), style: .plain, target: self,
+                                        action: #selector(refreshAction))
+        self.navigationItem.setRightBarButton(refreshButton, animated: true)
+    }
+    
+    @objc func refreshAction(sender: UIButton!){
         spinner?.buttonRefreshPressed()
     }
     
-    //
-    // MARK: - Prepare for segue
-    //
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "showDetailController" {
-            if let indexPath = homeTableView.indexPathForSelectedRow {
-                let controller = segue.destination as! HomeDetailController
-                controller.dataFromMain = homeManager.storage[(indexPath as NSIndexPath).row]
-            }
-        }
-    }
-}
-
-//
-// MARK: - Extension ViewController for TableView Methods
-//
-extension HomeController: UITableViewDelegate, UITableViewDataSource{
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        /// Json Response Exstension Connection
-        JsonManager.delegate = self
-        return homeManager.storage.count
+    func createLayout() -> UICollectionViewLayout {
+        var config = UICollectionLayoutListConfiguration(appearance: .sidebarPlain)
+        config.showsSeparators = true
+        let layout = UICollectionViewCompositionalLayout.list(using: config)
+        layout.configuration.interSectionSpacing = 0
+        return layout
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "homeCell", for: indexPath) as! HomeCell
-        let url_img = URL(string: homeManager.storage[indexPath.row].image_app)!
-        cell.imageApp.af_setImage(withURL: url_img)
-        cell.nameApp.text = homeManager.storage[indexPath.row].name
-        cell.artistApp.text = homeManager.storage[indexPath.row].artist_name
-        cell.categoryApp.text = homeManager.storage[indexPath.row].category_name
-        cell.priceApp.text = homeManager.storage[indexPath.row].price
-        cell.rank.text = ("# \(homeManager.storage[indexPath.row].position)")
-        return cell
-    }
-    
-    
-}
-
-//
-// MARK: - Extension ViewController for handle the Network response
-//
-extension HomeController: NetworkManagerDelegate {
-   
-    func networkFinishedWithData(response: (JsonTypeResponse, String, String, String)) {
-        DispatchQueue.main.async {
-            print("data")
-            if self.errorFound {
-                self.errorFound = false
-                self.labelNoConnection?.isHidden = true
-            }
-        }
-    }
-    
-    func networkFinishedWithError(response: (JsonTypeResponse, String, String, String)) {
-        ///Stop spinner
-        spinner?.spin.stopAnimating()
-        spinner?.ptr.endRefreshing()
+    func configureHierarchy(){
+        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: createLayout())
+        collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        collectionView.backgroundColor = UIColor(named: "HomeScreen")
         
-        DispatchQueue.main.async {
-            
-            switch response.0 {
-            case .networkError:
-                if !self.errorFound {
-                    self.labelNoConnection = UILabel(frame: CGRect(x: 0,
-                                                                   y: self.view.bounds.size.height -  50,
-                                                                   width: self.homeTableView.bounds.size.width,
-                                                                   height: 50))
-                    self.labelNoConnection!.backgroundColor = .black
-                    self.labelNoConnection!.textColor = .white
-                    self.labelNoConnection!.textAlignment = .center
-                    self.labelNoConnection!.text = response.2
-                    self.view.addSubview(self.labelNoConnection!)
-                }
-                self.errorFound = true
-                
-            case .serverError:
-                if !self.errorFound {
-                    let alert = UIAlertController(title: response.1,
-                                                  message: response.2,
-                                                  preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: response.3, style: .cancel, handler: nil))
-                    self.present(alert, animated: true, completion: nil)
-                }
-                self.errorFound = true
-            case .networkOK:
-                print("other")
-            }
+        let layout = UICollectionViewFlowLayout()
+        let width = UIScreen.main.bounds.width
+        layout.estimatedItemSize = CGSize(width: width, height: 130)
+        collectionView.collectionViewLayout = layout
+        view.addSubview(collectionView)
+        collectionView.delegate = self
+    }
+    
+    private func configureListCell() -> UICollectionView.CellRegistration<HomeCell, HomeControllerModel> {
+        return UICollectionView.CellRegistration<HomeCell, HomeControllerModel> {
+            (cell, indexPath, item) in
+            cell.setItems(item: item, indexPath: indexPath)
+        }
+    }
+    
+    func configureDataSource() {
+        
+        dataSource = UICollectionViewDiffableDataSource<HomeControllerSection, HomeControllerModel>(collectionView: collectionView) {
+            (collectionView: UICollectionView, indexPath: IndexPath, item: HomeControllerModel) -> UICollectionViewCell? in
+            return collectionView.dequeueConfiguredReusableCell(using: self.configureListCell(), for: indexPath, item: item)
+        }
+        viewModel.updateView()
+    }
+}
+
+extension HomeController: NetworkManagerDelegate {
+    
+    func networkFinishedWithData(response: (JsonTypeResponse, String, String, String, String)) {
+        spinner?.stopAnimation()
+        if let labelNoConnection = labelNoConnection {
+            labelNoConnection.isHidden = true
+        }
+    }
+    
+    func networkFinishedWithError(response: (JsonTypeResponse, String, String, String, String)) {
+        ///Stop spinner && ptr
+        spinner?.stopAnimation()
+        if self.viewModel.snapshot.items.isEmpty {
+            labelNoConnection = UILabel()
+            labelNoConnection?.numberOfLines = 10
+            labelNoConnection!.backgroundColor = .white
+            labelNoConnection!.textColor = .black
+            labelNoConnection!.textAlignment = .center
+            labelNoConnection?.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview(labelNoConnection!)
+            labelNoConnection!.text = response.2
+            NSLayoutConstraint.activate([
+                labelNoConnection!.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+                labelNoConnection!.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
+                labelNoConnection!.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
+                labelNoConnection!.heightAnchor.constraint(equalToConstant: 100)
+            ])
+        } else {
+            let alert = UIAlertController(title: response.1,
+                                          message: response.2,
+                                          preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: response.3, style: .cancel, handler: nil))
+            self.present(alert, animated: true, completion: nil)
+            spinner?.stopAnimation()
         }
     }
     
 }
 
-fileprivate let titleHomeTranslation = NSLocalizedString("HOME_TITLE", comment: "")
+
+extension HomeController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let item = dataSource?.itemIdentifier(for: indexPath) else {return}
+        collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+        let detailController = HomeDetailController(with: item)
+        self.navigationController?.pushViewController(detailController, animated: true)
+    }
+}
+
