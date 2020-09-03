@@ -7,14 +7,14 @@
 */
 
 //HOME
-
 "HOME_TITLE" = "Top App Pagamento";
+
 //Alert
-"SERVER_ERROR_ALERT_TITLE" = "Server non disponibili";
-"SERVER_ERROR_ALERT_CONTEXT" = "Si è verificato un problema nella connessione al server. Controlla la tua connessione internet e riprova";
+"SERVER_ERROR_ALERT_TITLE" = "Server non disponibile";
+"SERVER_ERROR_ALERT_CONTEXT" = "C'è stato un problema durante la connessione al server. Controlla la tua rete internet e prova di nuovo";
 "SERVER_ERROR_ALERT_BUTTON" = "OK";
-"NETWORK_ERROR_ALERT_CONTEXT" = "Connessione non disponibile";
+"NETWORK_ERROR_ALERT_CONTEXT" = "C'è stato un problema durante la connessione al server. Controlla la tua rete internet e prova di nuovo";
 
 //DETAIL
 
-"RELEASE_LABEL" = "Data Uscita";
+"RELEASE_LABEL" = "Data pubblicazione: ";

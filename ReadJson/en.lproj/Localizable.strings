@@ -7,14 +7,14 @@
 */
 
 //HOME
-
 "HOME_TITLE" = "Top Paid App";
+
 //Alert
 "SERVER_ERROR_ALERT_TITLE" = "Server Unavailable";
 "SERVER_ERROR_ALERT_CONTEXT" = "There was a problem connecting to the server. Please check your internet connection and try again.";
 "SERVER_ERROR_ALERT_BUTTON" = "OK";
-"NETWORK_ERROR_ALERT_CONTEXT" = "Network not available";
+"NETWORK_ERROR_ALERT_CONTEXT" = "There was a problem connecting to the server. Please check your internet connection and try again.";
 
 //DETAIL
 
-"RELEASE_LABEL" = "Release";
+"RELEASE_LABEL" = "Released date: ";
