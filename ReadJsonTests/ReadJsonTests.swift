@@ -11,7 +11,7 @@ import XCTest
 
 class ReadJsonTests: XCTestCase {
 
-    let homeManager = HomeManager.shared
+    let itunesJsonManager = ItunesJsonManager.shared
     
     private func setExpectation() {
         let expectation = self.expectation(description: "")
@@ -22,10 +22,10 @@ class ReadJsonTests: XCTestCase {
     }
     
     
-    private func initializationJson() -> JsonHomeModel?{
-        JsonManager().readJson(url: JsonHomeModel.url, setData: HomeManager.shared.loadData)
+    private func initializationJson() -> ItunesJsonModel?{
+        ParseJson().readJson(url: ItunesJsonModel.url, setData: itunesJsonManager.readJson)
         setExpectation()
-        return homeManager.jsonHomeObject
+        return itunesJsonManager.itunesJson
     }
     
     func testDataIsNotNil(){

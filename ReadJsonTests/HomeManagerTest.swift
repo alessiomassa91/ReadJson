@@ -11,7 +11,7 @@ import XCTest
 
 class HomeManagerTest: XCTestCase {
 
-    let homeManager = HomeManager.shared
+    let homeViewModel = HomeViewModel.shared
     
     private func setExpectation(){
         let expectation = self.expectation(description: "")
@@ -22,26 +22,25 @@ class HomeManagerTest: XCTestCase {
     }
     
     func testElementJsonHomeNotEmpty(){
-        JsonManager().readJson(url: JsonHomeModel.url, setData: HomeManager.shared.loadData)
+        ParseJson().readJson(url: ItunesJsonModel.url, setData: ItunesJsonManager.shared.readJson)
         setExpectation()
-        XCTAssertNotNil(homeManager.jsonHomeObject)
         
     }
     
     func testLoadData(){
         setExpectation()
         ///To be sure that homeManager.storage is not empty
-        XCTAssertTrue(homeManager.storage.count > 0)
-        let storage = homeManager.storage
-        for storageElement in storage {
-            XCTAssertTrue(storageElement.name != "")
-            XCTAssertTrue(storageElement.image_app != "")
-            XCTAssertTrue(storageElement.description != "")
-            XCTAssertTrue(storageElement.price != "")
-            XCTAssertTrue(storageElement.link_app != "")
-            XCTAssertTrue(storageElement.artist_name != "")
-            XCTAssertTrue(storageElement.category_name != "")
-            XCTAssertTrue(storageElement.release_data != "")
+       // XCTAssertTrue(homeManager.storage.count > 0)
+        let snapshotArray = homeViewModel.snapshot.items
+        for item in snapshotArray {
+            XCTAssertTrue(item.name != "")
+            XCTAssertTrue(item.image_app != "")
+            XCTAssertTrue(item.description != "")
+            XCTAssertTrue(item.price != "")
+            XCTAssertTrue(item.link_app != "")
+            XCTAssertTrue(item.artist_name != "")
+            XCTAssertTrue(item.category_name != "")
+            XCTAssertTrue(item.release_data != "")
         }
     }
 }
