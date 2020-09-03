@@ -11,10 +11,8 @@ import UIKit
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        JsonManager().readJson(url: JsonHomeModel.url, setData: HomeManager.shared.loadData)
+        InitAppManager.shared.startApp(jsonOnline: true)
         return true
     }
 

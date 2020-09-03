@@ -1,10 +1,9 @@
-
 //
 //  JsonHomeModel.swift
 //  ReadJson
 //
-//  Created by Alessio Massa on 23/12/2019.
-//  Copyright © 2019 Alessio Massa. All rights reserved.
+//  Created by Alessio Massa on 03/09/2020.
+//  Copyright © 2020 Alessio Massa. All rights reserved.
 //
 
 import Foundation
@@ -85,7 +84,7 @@ fileprivate let LINK_HREF = ("attributes","href")
 // MARK: - Second Level: Id - Feed
 fileprivate let ID_OBJECT = ("id","label")
 
-class JsonHomeModel {
+class ItunesJsonModel {
     
     static let url = URL
     var feed: Feed?

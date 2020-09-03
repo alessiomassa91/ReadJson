@@ -16,7 +16,8 @@ protocol NetworkManagerDelegate: class {
     /// - response.1 : Title Text Alert. It was setted with an empty value, because is not necessary an alert. Check JsonTypeResponse.swift file;
     /// - response.2 : Context Text Alert. It was setted with an empty value, because is not necessary an alert. Check JsonTypeResponse.swift file;
     /// - response.3 : Button Text Alert. It was setted with an empty value, because is not necessary an alert. Check JsonTypeResponse.swift file;
-    func networkFinishedWithData(response: (JsonTypeResponse, String, String, String))
+    /// - response.3 : Label Text Context. It was setted with an empty value, because is not necessary an alert. Check JsonTypeResponse.swift file;
+    func networkFinishedWithData(response: (JsonTypeResponse, String, String, String, String))
     
     ///  The reading Json process has been completed in failure
     /// - Parameter response: The parameter response contain:
@@ -24,5 +25,6 @@ protocol NetworkManagerDelegate: class {
     /// - response.1 : Title Text Alert. Check JsonTypeResponse.swift file;
     /// - response.2 : Context Text Alert. Check JsonTypeResponse.swift file;
     /// - response.3 : Button Text Alert. Check JsonTypeResponse.swift file;
-    func networkFinishedWithError(response: (JsonTypeResponse, String, String, String))
+    /// - response.3 : Label Text Context. Check JsonTypeResponse.swift file;
+    func networkFinishedWithError(response: (JsonTypeResponse, String, String, String, String))
 }

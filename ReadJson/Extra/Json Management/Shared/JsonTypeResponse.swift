@@ -17,34 +17,35 @@ enum JsonTypeResponse: String {
     /// The purpose of this method is to catch how the Json reading project goes.
     /// - Parameters:
     ///   - networkResponse: Type response: networkOK, networkError or networkError are available.
-    ///   - data: Data from the completionHandler in the Task
-    ///   - error: Error  from the completionHandler in the Task
-    static func getNetworkResponse(networkResponse: JsonTypeResponse) -> (JsonTypeResponse, String, String, String) {
+    static func getNetworkResponse(networkResponse: JsonTypeResponse) -> (JsonTypeResponse, String, String, String, String) {
  
         switch networkResponse {
          
-            ///No alert.
+            ///No alert, no labelNoConnection
         case .networkOK:
     
             let alertTitle = ""
             let alertContext = ""
             let alertButton = ""
-            return(.networkOK, alertTitle, alertContext, alertButton)
+            let labelContext = ""
+            return(.networkOK, alertTitle, alertContext, alertButton, labelContext)
             
-            ///Prepare the text inside the labelNoConnection.
+            ///Prepare the text inside the labelNoConnection and the alert.
         case .networkError:
             
-            let alertTitle = ""
-            let alertContext = networkErrorContextTranslation
-            let alertButton = ""
-            return(.networkError, alertTitle, alertContext, alertButton)
+            let alertTitle = serverErrorTitleTranslation
+            let alertContext = serverErrorContextTranslation
+            let alertButton = serverErrorButtonTranslation
+            let labelContext = networkErrorContextTranslation
+            return(.networkError, alertTitle, alertContext, alertButton, labelContext)
             
-            ///Server error, prepare the alert.
+            ///Prepare the text inside the labelNoConnection and the alert.
         case .serverError:
             let alertTitle = serverErrorTitleTranslation
             let alertContext = serverErrorContextTranslation
             let alertButton = serverErrorButtonTranslation
-            return(.serverError, alertTitle, alertContext, alertButton)
+            let labelContext = networkErrorContextTranslation
+            return(.serverError, alertTitle, alertContext, alertButton, labelContext)
         }
  
     }
