@@ -26,6 +26,10 @@ class HomeViewModel {
         updateView()
     }
     
+    func refreshDataSpinner() {
+        InitAppManager.shared.startApp(jsonOnline: true)
+    }
+    
     func updateView() {
         guard let homeController = homeController, let dataSource = homeController.dataSource else { return }
         dataSource.apply(self.snapshot, to: .main, animatingDifferences: true)

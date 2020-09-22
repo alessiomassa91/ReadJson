@@ -10,66 +10,76 @@ import UIKit
 
 class SpinningWheel {
     
-    var ptr : UIRefreshControl!
     var spin : UIActivityIndicatorView!
-    var collectionView: UICollectionView
+    var view: UIView
+    var refreshData: (()->Void)?
     
-    init(collectionView: UICollectionView) {
-        self.collectionView = collectionView
+    
+    init(view: UIView, refreshData: @escaping () -> Void ) {
+        self.view = view
+        self.refreshData = refreshData
     }
     
-    /// This method is used to implement the refresh control and add the spin when you drag down the table in the meantime is refreshing the table
-    func refreshControlImplementation() {
-        ptr = UIRefreshControl()
-        ptr.addTarget(self, action: #selector(refresh), for: .valueChanged)
-        collectionView.addSubview(ptr)
+    init(view: UIView) {
+        self.view = view
     }
+}
+
+extension SpinningWheel {
     
     /// This method is used to activate the spinner in the middle of the table
-    func spinnerImplementation() {
+    func spinnerImplementation(xPosition: CGFloat, yPosition: CGFloat, color: UIColor) {
         if spin == nil {
             spin = UIActivityIndicatorView(style: .large)
-            spin.color = UIColor.darkGray
+            spin.color = color
             spin.hidesWhenStopped = true
-            spin.center = CGPoint(x: UIScreen.main.bounds.size.width / 2,
-                                  y: (UIScreen.main.bounds.size.height / 2) - 44)
-            collectionView.addSubview(spin)
+            spin.center = CGPoint(x: xPosition, y: yPosition)
+            view.addSubview(spin)
         }
         spin.startAnimating()
     }
     
-    /// Reload data
-    private func getData() {
-        if InitAppManager.online {
-            ParseJson().readJson(url: ItunesJsonModel.url, setData: ItunesJsonManager.shared.readJson)
-        } else {
-            ParseJson().readOfflineJson(setData: ItunesJsonManager.shared.readJson)
-        }
-        
-    }
-    
-    /// Scroll refresh
-    @objc private func refresh() {
-        ptr.beginRefreshing()
-        getData()
-    }
-    
-    /// Button refresh
-    func buttonRefreshPressed() {
-        if spin != nil {
-            spin.startAnimating()
-        }
-        collectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
-        getData()
-    }
-    
     func stopAnimation() {
         
-        if ptr != nil && ptr.isRefreshing {
-            ptr.endRefreshing()
-        }
         if spin != nil {
             spin.stopAnimating()
         }
     }
+    
 }
+
+class RefreshPTR {
+    
+    var ptr : UIRefreshControl?
+    var collectionView: UICollectionView
+    var refreshData: (()->Void)?
+    
+    
+    init(collectionView: UICollectionView, refreshData: @escaping () -> Void ) {
+        self.collectionView = collectionView
+        self.refreshData = refreshData
+    }
+    
+    init(collectionView: UICollectionView) {
+        self.collectionView = collectionView
+    }
+    /// This method is used to implement the refresh control and add the spin when you drag down the table in the meantime is refreshing the table
+    func refreshControlImplementation() {
+        guard refreshData != nil else { return }
+        ptr = UIRefreshControl()
+        ptr!.addTarget(self, action: #selector(refresh), for: .valueChanged)
+        collectionView.addSubview(ptr!)
+    }
+    
+    @objc private func refresh() {
+        guard let refreshData = refreshData else { return }
+        ptr!.beginRefreshing()
+        refreshData()
+    }
+    
+    func stopAnimation() {
+        guard let ptr = ptr, ptr.isRefreshing else { return }
+        ptr.endRefreshing()
+    }
+}
+

@@ -53,6 +53,7 @@ class HomeController: UIViewController {
     var collectionView: UICollectionView!
     var dataSource: UICollectionViewDiffableDataSource<HomeControllerSection, HomeControllerModel>?
     var spinner: SpinningWheel?
+    var ptr: RefreshPTR?
     private var refreshButton: UIBarButtonItem!
     
     override func viewDidLoad() {
@@ -66,9 +67,13 @@ class HomeController: UIViewController {
     
     func initManager() {
         /// Spinner Initialization
-        spinner = SpinningWheel(collectionView: collectionView)
-        spinner?.spinnerImplementation()
-        spinner?.refreshControlImplementation()
+        spinner = SpinningWheel(view: collectionView, refreshData: viewModel.refreshDataSpinner)
+        spinner?.spinnerImplementation(xPosition: collectionView.bounds.size.width / 2,
+                                       yPosition: collectionView.bounds.size.height / 2,
+                                       color: UIColor.darkGray)
+        ptr = RefreshPTR(collectionView: collectionView, refreshData: viewModel.refreshDataSpinner)
+        ptr?.refreshControlImplementation()
+        
         /// Json Response Exstension Connection
         ParseJson.delegate = self
         if !InitAppManager.online {
@@ -105,7 +110,10 @@ extension HomeController {
     }
     
     @objc func refreshAction(sender: UIButton!){
-        spinner?.buttonRefreshPressed()
+        guard let spin = spinner?.spin, let refreshData = spinner?.refreshData else {return}
+        spin.startAnimating()
+        collectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
+        refreshData()
     }
     
     func createLayout() -> UICollectionViewLayout {
@@ -150,6 +158,7 @@ extension HomeController: NetworkManagerDelegate {
     
     func networkFinishedWithData(response: (JsonTypeResponse, String, String, String, String)) {
         spinner?.stopAnimation()
+        ptr?.stopAnimation()
         if let labelNoConnection = labelNoConnection {
             labelNoConnection.isHidden = true
         }
@@ -158,6 +167,7 @@ extension HomeController: NetworkManagerDelegate {
     func networkFinishedWithError(response: (JsonTypeResponse, String, String, String, String)) {
         ///Stop spinner && ptr
         spinner?.stopAnimation()
+        ptr?.stopAnimation()
         if self.viewModel.snapshot.items.isEmpty {
             labelNoConnection = UILabel()
             labelNoConnection?.numberOfLines = 10
