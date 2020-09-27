@@ -223,12 +223,7 @@ class ItunesJsonModel {
                 /// Im:Name
                 self.im_name = json[ENTRY_IM_NAME.0][ENTRY_IM_NAME.1].string
                 /// Im:Image
-                var imImageArray = [ImImage]()
-                json[ENTRY_IM_IMAGE_ARRAY].forEach { (imImageElement) in
-                    imImageArray.append(ImImage(json: imImageElement.1))
-                    self.im_image?.append(ImImage(json: imImageElement.1))
-                }
-                self.im_image = imImageArray
+                self.im_image = json[ENTRY_IM_IMAGE_ARRAY].map{ImImage(json: $0.1)}
                 /// Summary
                 self.summary = json[ENTRY_SUMMARY.0][ENTRY_SUMMARY.1].string
                 /// Im:Price
@@ -240,11 +235,7 @@ class ItunesJsonModel {
                 /// Title
                 self.title = json[ENTRY_TITLE.0][ENTRY_TITLE.1].string
                 /// Link
-                var linkArray = [Link]()
-                json[ENTRY_LINK_ARRAY].forEach { (linkElement) in
-                    linkArray.append(Link(json: linkElement.1))
-                }
-                self.link = linkArray
+                self.link = json[ENTRY_LINK_ARRAY].map{Link(json: $0.1)}
                 /// Id
                 self.id = Id(json: json[ENTRY_ID_OBJECT])
                 /// Im:Artist
@@ -284,11 +275,7 @@ class ItunesJsonModel {
             ///Author
             self.author = Author(json: json[AUTHOR_OBJECT])
             ///Entry
-            var entryArray = [Entry]()
-            json[ENTRY_ARRAY].forEach { (entryElement) in
-                entryArray.append(Entry(json: entryElement.1))
-            }
-            self.entry = entryArray
+            self.entry = json[ENTRY_ARRAY].map{Entry(json: $0.1)}
             ///Updated
             self.updated = json[UPDATED_OBJECT.0][UPDATED_OBJECT.1].string
             ///Rights
@@ -298,11 +285,7 @@ class ItunesJsonModel {
             ///Icon
             self.icon = json[ICON_OBJECT.0][ICON_OBJECT.1].string
             ///Link Array
-            var linkArray = [Link]()
-            json[LINK_ARRAY].forEach { (linkElement) in
-                linkArray.append(Link(json: linkElement.1))
-            }
-            self.link = linkArray
+            self.link = json[LINK_ARRAY].map{Link(json: $0.1)}
             ///ID
             self.id = json[ID_OBJECT.0][ID_OBJECT.1].string
         }
